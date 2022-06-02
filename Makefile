@@ -6,9 +6,9 @@ SRC_D=./src/
 SOURCES=unbounded_int.c main.c
 OBJECTS=$(SOURCES:.c=.o)
 
-all: test
+all: main
 
-test: $(OBJECTS)
+main: $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $^
 
 %.o: $(SRC_D)%.c
@@ -17,3 +17,4 @@ test: $(OBJECTS)
 clean:
 	find . -name "*~" -delete
 	find . -name "*.o" -delete
+	rm main
