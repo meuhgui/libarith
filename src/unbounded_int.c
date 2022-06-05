@@ -111,3 +111,51 @@ ubint ll_to_ubint(long long i){
 
 	return UB_ERR;
 }
+
+/*
+ * Returns a string of length ub.len that contains
+ * the value represented by the given ub.
+ * Returns NULL on error.
+ */
+char* ubint_to_str(ubint ub){
+	int    i;
+	int    len;
+	char*  res;
+	digit* cur;
+
+	res = NULL;
+	cur = NULL;
+
+	if (ub.sign == '*')
+		goto error;
+
+	if (ub.sign == '-')
+		len = ub.len + 2; /* +2 for sign and '\0' */
+	else
+		len = ub.len + 1; /* +1 for '\0' */
+
+	res = malloc(len);
+	if (res == NULL) {
+		perror("malloc");
+		goto error;
+	}
+
+	memset(res, '\0', len);
+
+	cur = ub.first;
+	i   = 0;
+
+	while (cur != NULL && i < len - 1) {
+		res[i] = cur->val;
+		cur = cur->next;
+		i++;
+	}
+
+	return res;
+
+ error:
+	fprintf(stderr, "Could not convert unbounded integer to string\n");
+	free(res);
+
+	return NULL;
+}
