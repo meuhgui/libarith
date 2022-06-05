@@ -197,3 +197,16 @@ int compare(ubint a, ubint b){
 
 	return 0;
 }
+
+/*
+ * Compares the unbounded integer a to the long long value b
+ * Returns an integer less than, equal to, or greater than zero if a
+ * is found, respectively, to be less than, to match, or be greater than b.
+ */
+int compare_ll(ubint a, long long b){
+	ubint b_ubint;
+
+	b_ubint = ll_to_ubint(b);
+
+	return compare(a, b_ubint);
+}
