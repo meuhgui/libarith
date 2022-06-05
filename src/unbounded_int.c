@@ -59,7 +59,7 @@ ubint str_to_ubint(const char* s){
 	ret.first = malloc(sizeof (struct digit));
 	if (ret.first == NULL) {
 		perror("malloc");
-		goto error;
+		return UB_ERR;
 	}
 
 	ret.first->val  = s[start];
@@ -89,9 +89,25 @@ ubint str_to_ubint(const char* s){
 
  error:
 	fprintf(stderr, "Could not create unbounded integer from [%s]\n", s);
-	ret.sign  = '*';
-	ret.len   = 0;
 	free_ubint(ret);
 	
-	return ret;
+	return UB_ERR;
+}
+
+/*
+ * Returns an unbounded integer from the integer represented by i.
+ * If an error occured, returns an unbounded integer with '*' as sign value.
+ */
+ubint ll_to_ubint(long long i){
+	char str[256]; /* Plenty of bytes */
+
+	if (snprintf(str, 256, "%lld", i) < 0)
+		goto error;
+
+	return str_to_ubint(str);
+
+ error:
+	fprintf(stderr, "Could not create unbounded integer from [%lld]\n", i);
+
+	return UB_ERR;
 }
