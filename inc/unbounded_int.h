@@ -48,4 +48,11 @@ ubint ll_to_ubint(long long i);
  */
 char* ubint_to_str(ubint ub);
 
+/*
+ * Compares the two unbounded integers a and b.
+ * Returns an integer less than, equal to, or greater than zero if a
+ * is found, respectively, to be less than, to match, or be greater than b.
+ */
+int compare(ubint a, ubint b);
+
 #endif /* UNBOUNDED_INT_H */

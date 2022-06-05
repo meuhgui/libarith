@@ -20,6 +20,10 @@ int main(){
 	s3 = ubint_to_str(ub1);
 	printf("%s\n", s3);
 
+	printf("%d\n", compare(ub1, ub2)); /* -1 */
+	printf("%d\n", compare(ub2, ub1)); /* 1 */
+	printf("%d\n", compare(ub1, ub1)); /* 0 */	
+
 	free_ubint(ub1);
 	free_ubint(ub2);
 	free(s3);
