@@ -21,6 +21,8 @@ struct unbounded_int {
 typedef struct digit digit;
 typedef struct unbounded_int ubint;
 
+static const ubint UB_ERR = {'*', 0, NULL, NULL}; /* Returned on error */
+
 /*
  * Frees all the memory allocated to the given unbounded integer
  */
@@ -32,5 +34,11 @@ void free_ubint(ubint ui);
  * integer returned will have '*' as sign.
  */
 ubint str_to_ubint(const char* s);
+
+/*
+ * Returns an unbounded integer from the integer represented by i.
+ * If an error occured, returns an unbounded integer with '*' as sign value.
+ */
+ubint ll_to_ubint(long long i);
 
 #endif /* UNBOUNDED_INT_H */
