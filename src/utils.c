@@ -16,7 +16,7 @@ int is_int(const char* s){
 
 	for (i = 0; i < len; i++) {
 		if (s[i] < 48 || s[i] > 57) {
-			if (i == 0 && s[i] == '-')
+			if (i == 0 && s[i] == '-' && len > 1)
 				continue;
 			else
 				return -1;
