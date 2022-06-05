@@ -159,3 +159,41 @@ char* ubint_to_str(ubint ub){
 
 	return NULL;
 }
+
+/*
+ * Compares the two unbounded integers a and b.
+ * If a or b have '*' as sign value, result is not predictable.
+ * Returns an integer less than, equal to, or greater than zero if a
+ * is found, respectively, to be less than, to match, or be greater than b.
+ */
+int compare(ubint a, ubint b){
+	digit* a_cur;
+	digit* b_cur;
+
+	if (a.sign == '-' && b.sign == '+')
+		return -1;
+
+	if (a.sign == '+' && b.sign == '-')
+		return 1;
+
+	if (a.len > b.len)
+		return ((a.sign == '-') ? -1 : 1);
+
+	if (a.len < b.len)
+		return ((a.sign == '-') ? 1 : -1);
+
+	/* a.len == b.len && a.sign == b.sign */
+	a_cur = a.first;
+	b_cur = b.first;
+
+	while (a_cur != NULL || b_cur != NULL) {
+		if (a_cur->val < b_cur->val)
+			return ((a.sign = '-') ? -1 : 1);
+		if (a_cur->val > b_cur->val)
+			return ((a.sign = '-') ? 1 : -1);
+		a_cur = a_cur->next;
+		b_cur = b_cur->next;
+	}
+
+	return 0;
+}
