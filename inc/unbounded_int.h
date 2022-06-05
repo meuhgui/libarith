@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "utils.h"
+#include "string.h"
 
 struct digit {
 	struct digit* next; /* pointer to the next digit */
@@ -21,45 +21,43 @@ struct unbounded_int {
 typedef struct digit digit;
 typedef struct unbounded_int ubint;
 
-static const ubint UB_ERR = {'*', 0, NULL, NULL}; /* Returned on error */
-
 /*
  * Frees all the memory allocated to the given unbounded integer
  */
-void free_ubint(ubint ui);
+extern void free_ubint(ubint ui);
 
 /*
  * Returns an unbounded integer from the integer represented by s.
  * If s does not represent an integer or an error occured, the unbounded
  * integer returned will have '*' as sign.
  */
-ubint str_to_ubint(const char* s);
+extern ubint str_to_ubint(const char* s);
 
 /*
  * Returns an unbounded integer from the integer represented by i.
  * If an error occured, returns an unbounded integer with '*' as sign value.
  */
-ubint ll_to_ubint(long long i);
+extern ubint ll_to_ubint(long long i);
 
 /*
  * Returns a string of length ub.len that contains
  * the value represented by the given ub.
  * Returns NULL on error.
  */
-char* ubint_to_str(ubint ub);
+extern char* ubint_to_str(ubint ub);
 
 /*
  * Compares the two unbounded integers a and b.
  * Returns an integer less than, equal to, or greater than zero if a
  * is found, respectively, to be less than, to match, or be greater than b.
  */
-int compare(ubint a, ubint b);
+extern int compare(ubint a, ubint b);
 
 /*
  * Compares the unbounded integer a to the long long value b
  * Returns an integer less than, equal to, or greater than zero if a
  * is found, respectively, to be less than, to match, or be greater than b.
  */
-int compare_ll(ubint a, long long b);
+extern int compare_ll(ubint a, long long b);
 
 #endif /* UNBOUNDED_INT_H */

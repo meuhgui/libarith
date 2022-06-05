@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "utils.h"
 #include "unbounded_int.h"
 
 int main(){
@@ -11,7 +10,8 @@ int main(){
 
 	char* s3;
 
-	s1 = "-456839482348023240237456203475620347569238467590274352908746290347";
+	s1 = "-00000000000000000000000000000000000000000000";
+	/* s1 = "-00043"; */
 	i2 = 4223372036854775807;
 
 	ub1 = str_to_ubint(s1);
@@ -19,10 +19,6 @@ int main(){
 
 	s3 = ubint_to_str(ub1);
 	printf("%s\n", s3);
-
-	printf("%d\n", compare(ub1, ub2)); /* -1 */
-	printf("%d\n", compare(ub2, ub1)); /* 1 */
-	printf("%d\n", compare(ub1, ub1)); /* 0 */	
 
 	free_ubint(ub1);
 	free_ubint(ub2);
