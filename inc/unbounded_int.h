@@ -41,4 +41,11 @@ ubint str_to_ubint(const char* s);
  */
 ubint ll_to_ubint(long long i);
 
+/*
+ * Returns a string of length ub.len that contains
+ * the value represented by the given ub.
+ * Returns NULL on error.
+ */
+char* ubint_to_str(ubint ub);
+
 #endif /* UNBOUNDED_INT_H */
