@@ -1,5 +1,7 @@
 #include "unbounded_int.h"
 
+static const ubint UB_ERR = {'*', 0, NULL, NULL}; /* Returned on error */
+
 /*
  * Frees all the memory allocated to the given unbounded integer
  */
@@ -23,6 +25,95 @@ void free_ubint(ubint ui){
 }
 
 /*
+ * Returns 0 if the string s is an integer (all characters are digits, with the
+ * exception of the first character that might be a '-' sign).
+ * Returns -1 otherwise.
+ */
+static int is_int(const char* s){
+	int i;
+	int len;
+
+	if (s == NULL)
+		return -1;
+
+	len = strlen(s);
+
+	for (i = 0; i < len; i++) {
+		if (s[i] < 48 || s[i] > 57) {
+			if (i == 0 && s[i] == '-' && len > 1)
+				continue;
+			else
+				return -1;
+		}
+	}
+
+	return 0;
+}
+
+/*
+ * Returns s (which is an integer) without heading 0s.
+ * If s is a negative integer, 0s following the '-' sign are
+ * also removed.
+ * Returns NULL on error.
+ */
+static char* remove_heading_zeros(const char* s){
+	int   i;
+	int   count;
+	int   start;
+	int   len;
+	char* res;
+
+	res   = NULL;
+	start = 0;
+	count = 0;
+	len   = 0;
+
+	if (is_int(s) < 0)
+		goto error;
+
+	len = strlen(s);
+
+	if (s[0] == '-')
+		start = 1;
+	else
+		start = 0;
+
+	for (i = start; i < len; i++) {
+		if (s[i] != '0')
+			break;
+		else
+			count++;
+	}
+
+	if (count == len - start) { /* all zeros */
+		res = malloc(2);
+		memset(res, '\0', 2);
+		strcpy(res, "0");
+		return res;
+	}
+
+	res = malloc(len + start - count + 1); /* +1 for '\0', +start for sign */
+	if (res == NULL) {
+		perror("malloc");
+		goto error;
+	}
+	
+	if (s[0] == '-') {
+		res[0] = '-';
+		strcpy(res + 1, s + i);
+	} else {
+		strcpy(res, s + 1);
+	}
+
+	return res;
+
+ error:
+	fprintf(stderr, "Could not remove heading zeros\n");
+	free(res);
+	return NULL;
+}
+
+/*
  * Returns an unbounded integer from the integer represented by s.
  * If s does not represent an integer or an error occured, the unbounded
  * integer returned will have '*' as sign.
@@ -34,6 +125,7 @@ ubint str_to_ubint(const char* s){
 	ubint  ret;
 	digit* cur;
 	digit* prev;
+	char*  tmp;
 
 	i         = 0;
 	start     = 0;
@@ -41,12 +133,14 @@ ubint str_to_ubint(const char* s){
 	ret.last  = NULL;
 	cur       = NULL;
 	prev      = NULL;
-	len       = strlen(s);
 
 	if (is_int(s) < 0)
 		goto error;
 
-	if (s[0] == '-') {
+	tmp = remove_heading_zeros(s);
+	len = strlen(tmp);
+
+	if (tmp[0] == '-') {
 		ret.sign = '-';
 		ret.len  = len - 1;
 		start    = 1;
@@ -62,7 +156,7 @@ ubint str_to_ubint(const char* s){
 		return UB_ERR;
 	}
 
-	ret.first->val  = s[start];
+	ret.first->val  = tmp[start];
 	ret.last        = ret.first;
 	ret.first->next = NULL;
 	ret.first->prev = NULL;
@@ -75,7 +169,7 @@ ubint str_to_ubint(const char* s){
 			goto error;
 		}
 
-		cur->val   = s[i];
+		cur->val   = tmp[i];
 		cur->prev  = prev;
 		prev->next = cur;
 		cur->next  = NULL;
@@ -85,10 +179,13 @@ ubint str_to_ubint(const char* s){
 	ret.last       = prev;
 	ret.last->next = NULL;
 
+	free(tmp);
+
 	return ret;
 
  error:
-	fprintf(stderr, "Could not create unbounded integer from [%s]\n", s);
+	fprintf(stderr, "Could not create unbounded integer from [%s]\n", tmp);
+	free(tmp);
 	free_ubint(ret);
 	
 	return UB_ERR;
@@ -143,7 +240,12 @@ char* ubint_to_str(ubint ub){
 	memset(res, '\0', len);
 
 	cur = ub.first;
-	i   = 0;
+	if (ub.sign == '-') {
+		i = 1;
+		res[0] = '-';
+	} else {
+		i = 0;
+	}
 
 	while (cur != NULL && i < len - 1) {
 		res[i] = cur->val;
