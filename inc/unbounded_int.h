@@ -60,4 +60,6 @@ extern int compare(ubint a, ubint b);
  */
 extern int compare_ll(ubint a, long long b);
 
+extern ubint positive_difference(ubint a, ubint b);
+
 #endif /* UNBOUNDED_INT_H */

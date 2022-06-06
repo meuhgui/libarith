@@ -313,6 +313,41 @@ int compare_ll(ubint a, long long b){
 	return compare(a, b_ubint);
 }
 
+
+/*
+ * Removes heading zeros off of the unbounded integer a.
+ * Returns NULL on error;
+ * This function should be used with unbouned integers that are results of
+ * computations of valid unbounded integers.
+ */
+static ubint* remove_heading_zeros_ubint(ubint* a){
+	int    count;
+	digit* tmp;
+
+	if (a->sign == '*')
+		goto error;
+
+	count = 0;
+	tmp   = a->first;
+
+	while (tmp != NULL && tmp->val == '0') {
+		a->first = tmp->next;
+		tmp = tmp->next;
+		free(tmp->prev);
+		tmp->prev = NULL;
+		count++;
+	}
+
+	a->len -= count;
+
+	return a;
+	
+ error:
+	fprintf(stderr, "Could not remove heading zeros\n");
+	free_ubint(*a);
+	return NULL;
+}
+
 /*
  * Returns the sum of the two unbounded integers a and b.
  * Both a and b must be positive. If they are not, returns
@@ -393,7 +428,101 @@ static ubint positive_sum(ubint a, ubint b){
 
 	res.len = len;
 
-	return res;
+	return *remove_heading_zeros_ubint(&res);
+
+ error:
+	fprintf(stderr, "Could not compute sum of positive unbounded integers\n");
+	free(cur);
+	free_ubint(res);
+	return UB_ERR;
+}
+
+/*
+ * Returns the difference of the two unbounded integers a and b.
+ * Both a and b must be positive and such that a >= b. Otherwise,
+ * returns an unbounded integer with '*' as sign.
+ */
+ubint positive_difference(ubint a, ubint b){
+	int    a_val;
+	int    b_val;
+	int    i;
+	int    longest;
+	int    len;
+	int    c_tmp;
+	int    r;
+	char   c;
+	digit* cur;
+	digit* tmp;
+	digit* pa;
+	digit* pb;
+	ubint  res;
+
+	if (a.sign == '*' || a.sign == '-' || b.sign == '*' || b.sign == '-')
+		goto error;
+
+	if (compare(a, b) <= 0) /* subject says a >= b and a > b... */
+		goto error;
+
+	res.first = NULL;
+	res.last  = NULL;
+	cur       = NULL;
+	tmp       = NULL;
+	res.sign  = '+';
+	longest   = (a.len > b.len) ? a.len : b.len;
+	pa        = a.last;
+	pb        = b.last;
+	r         = 0;
+	len       = 0;
+
+	for (i = 0; i < longest; i++) {
+		if (pa != NULL) 
+			a_val = pa->val - '0';
+		else
+			a_val = 0;
+
+		if (pb != NULL)
+			b_val = pb->val - '0';
+		else
+			b_val = 0;
+
+		c_tmp = (a_val - b_val + r);
+		c     = ((c_tmp >= 0) ? c_tmp : c_tmp + 10) + '0';
+		r     = ((c_tmp >= 0) ? 0 : -1);
+
+		if (i == 0) {
+			res.last = malloc(sizeof (struct digit));
+			if (res.last == NULL) {
+				perror("malloc");
+				goto error;
+			}
+
+			res.last->val  = c;
+			res.last->next = NULL;
+			tmp            = res.last;
+		} else {
+			cur = malloc(sizeof (struct digit));
+			if (cur == NULL) {
+				perror("malloc");
+				goto error;
+			}
+
+			cur->val  = c;
+			cur->next = tmp;
+			tmp->prev = cur;
+			res.first = cur;
+			tmp       = cur;
+		}
+
+		len++;
+		if (pa != NULL)
+			pa = pa->prev;
+		if (pb != NULL)
+			pb = pb->prev;
+	}
+
+	res.len = len;
+
+	return *remove_heading_zeros_ubint(&res);
 
  error:
 	fprintf(stderr, "Could not compute sum of positive unbounded integers\n");
