@@ -102,7 +102,7 @@ static char* remove_heading_zeros(const char* s){
 		res[0] = '-';
 		strcpy(res + 1, s + i);
 	} else {
-		strcpy(res, s + 1);
+		strcpy(res, s + i);
 	}
 
 	return res;
@@ -311,4 +311,93 @@ int compare_ll(ubint a, long long b){
 	b_ubint = ll_to_ubint(b);
 
 	return compare(a, b_ubint);
+}
+
+/*
+ * Returns the sum of the two unbounded integers a and b.
+ * Both a and b must be positive. If they are not, returns
+ * an unbounded integer with sign '*'.
+ */
+static ubint positive_sum(ubint a, ubint b){
+	int    a_val;
+	int    b_val;
+	int    i;
+	int    longest;
+	int    len;
+	char   c;
+	int    r;
+	digit* cur;
+	digit* tmp;
+	digit* pa;
+	digit* pb;
+	ubint  res;
+
+	if (a.sign == '*' || b.sign == '*' || a.sign == '-' || b.sign == '-')
+		goto error;
+
+	res.first = NULL;
+	res.last  = NULL;
+	cur       = NULL;
+	tmp       = NULL;
+	res.sign  = '+';
+	longest   = (a.len > b.len) ? a.len : b.len;
+	pa        = a.last;
+	pb        = b.last;
+	r         = 0;
+	len       = 0;
+
+	for (i = 0; i < longest; i++) {
+		if (pa != NULL) 
+			a_val = pa->val - '0';
+		else
+			a_val = 0;
+
+		if (pb != NULL)
+			b_val = pb->val - '0';
+		else
+			b_val = 0;
+
+		c = (char) ((a_val + b_val + r) % 10 + '0');
+		r = (a_val + b_val + r) / 10;
+
+		if (i == 0) {
+			res.last = malloc(sizeof (struct digit));
+			if (res.last == NULL) {
+				perror("malloc");
+				goto error;
+			}
+
+			res.last->val  = c;
+			res.last->next = NULL;
+			tmp            = res.last;
+		} else {
+			cur = malloc(sizeof (struct digit));
+			if (cur == NULL) {
+				perror("malloc");
+				goto error;
+			}
+
+			cur->val  = c;
+			cur->next = tmp;
+			tmp->prev = cur;
+			res.first = cur;
+			tmp       = cur;
+		}
+
+		len++;
+		if (pa != NULL)
+			pa = pa->prev;
+		if (pb != NULL)
+			pb = pb->prev;
+	}
+
+	res.len = len;
+
+	return res;
+
+ error:
+	fprintf(stderr, "Could not compute sum of positive unbounded integers\n");
+	free(cur);
+	free_ubint(res);
+	return UB_ERR;
 }
