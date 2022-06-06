@@ -330,7 +330,7 @@ static ubint* remove_heading_zeros_ubint(ubint* a){
 	count = 0;
 	tmp   = a->first;
 
-	while (tmp != NULL && tmp->val != '0') {
+	while (tmp != NULL && tmp->val == '0') {
 		a->first = tmp->next;
 		tmp = tmp->next;
 		free(tmp->prev);

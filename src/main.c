@@ -12,7 +12,7 @@ int main(){
 
 	char* res = ubint_to_str(dif);
 
-	printf("%s", res);
+	printf("%s\n", res);
 
 	free(res);
 	free_ubint(uba);
