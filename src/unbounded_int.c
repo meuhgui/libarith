@@ -367,9 +367,11 @@ static ubint positive_sum(ubint a, ubint b){
 	digit* pb;
 	ubint  res;
 
-	if (a.sign == '*' || b.sign == '*' || a.sign == '-' || b.sign == '-')
+	if (a.sign == '*' || b.sign == '*' || a.sign == '-' || b.sign == '-') {
+		printf("this test\n");
 		goto error;
-
+	}
+	
 	res.first = NULL;
 	res.last  = NULL;
 	cur       = NULL;
@@ -442,7 +444,7 @@ static ubint positive_sum(ubint a, ubint b){
  * Both a and b must be positive and such that a >= b. Otherwise,
  * returns an unbounded integer with '*' as sign.
  */
-ubint positive_difference(ubint a, ubint b){
+static ubint positive_difference(ubint a, ubint b){
 	int    a_val;
 	int    b_val;
 	int    i;
@@ -457,12 +459,16 @@ ubint positive_difference(ubint a, ubint b){
 	digit* pb;
 	ubint  res;
 
-	if (a.sign == '*' || a.sign == '-' || b.sign == '*' || b.sign == '-')
+	if (a.sign == '*' || a.sign == '-' || b.sign == '*' || b.sign == '-') {
+		printf("first test\n");
 		goto error;
+	}
 
-	if (compare(a, b) <= 0) /* subject says a >= b and a > b... */
+	if (compare(a, b) <= 0) /* subject says a >= b and a > b... */ {
+		printf("second test\n");
 		goto error;
-
+	}
+	
 	res.first = NULL;
 	res.last  = NULL;
 	cur       = NULL;
@@ -525,8 +531,96 @@ ubint positive_difference(ubint a, ubint b){
 	return *remove_heading_zeros_ubint(&res);
 
  error:
-	fprintf(stderr, "Could not compute sum of positive unbounded integers\n");
+	fprintf(stderr, "Could not compute difference of positive unbounded integers\n");
 	free(cur);
 	free_ubint(res);
+	return UB_ERR;
+}
+
+/*
+ * Returns a value different than 0 if the unbounded integer a is not 0,
+ * 0 otherwise.
+ */
+static int is_zero(ubint a){
+	return (a.len == 1 && a.first->val == '0');
+}
+
+/*
+ * Returns the absolute value of the unbounded integer a.
+ * Returns an unbounded integer with '*' as sign on error.
+ */
+static ubint abs_ubint(ubint a){
+	ubint res;
+
+	if (a.sign == '*')
+		goto error;
+
+	res.sign  = a.sign;
+	res.len   = a.len;
+	res.first = a.first;
+	res.last  = a.last;
+
+	if (a.sign == '-')
+		res.sign = '+';
+
+	return res;
+
+ error:
+	fprintf(stderr, "Could not compute absolute value\n");
+	return UB_ERR;
+}
+
+static void show(ubint a){
+	printf("Sign : %c\n", a.sign);
+	printf("Length : %ld\n", a.len);
+	digit* tmp;
+	tmp = a.first;
+	while (tmp != NULL) {
+		printf("%c ", tmp->val);
+		tmp = tmp->next;
+	}
+	printf("\n");
+}
+
+/*
+ * Returns the sum of the unbounded integers a and b.
+ * If an error occured, an unbounded integer of sign '*' is returned.
+ */
+extern ubint sum_ubint(ubint a, ubint b){
+	ubint res;
+
+	if (a.sign == '*' || b.sign == '*')
+		goto error;
+
+	/* a + b if a, b >= 0 */
+	if (a.sign == '+' && b.sign == '+')
+		return positive_sum(a, b);
+
+	/* -(|a| + |b|) if a, b <= 0 */
+	if (a.sign == '-' && b.sign == '-') {
+		printf("a sign - b sign -\n");
+		res = positive_sum(abs_ubint(a), abs_ubint(b));
+		res.sign = '-';
+		return res;
+	}
+
+	/* a - |b| if a >= 0, b < 0 */
+	if (a.sign == '+' && b.sign == '-' && !is_zero(b)) {
+		printf("a - |b|\n");
+		return positive_difference(a, abs_ubint(b));
+	}
+
+	/* b - |a| if b >= 0, a < 0 */
+	if (b.sign == '+' && a.sign == '-' && !is_zero(a)) {
+		printf("a\n");
+		show(a);
+		printf("b\n");
+		show(b);
+		printf("b - |a|\n");
+		return positive_difference(b, abs_ubint(a));
+	}
+
+ error:
+	fprintf(stderr, "Could not compute sum\n");
 	return UB_ERR;
 }

@@ -60,6 +60,10 @@ extern int compare(ubint a, ubint b);
  */
 extern int compare_ll(ubint a, long long b);
 
-extern ubint positive_difference(ubint a, ubint b);
+/*
+ * Returns the sum of the unbounded integers a and b.
+ * If an error occured, an unbounded integer of sign '*' is returned.
+ */
+extern ubint sum_ubint(ubint a, ubint b);
 
 #endif /* UNBOUNDED_INT_H */
