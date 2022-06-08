@@ -582,18 +582,18 @@ ubint sum_ubint(ubint a, ubint b){
 		goto error;
 
 	/* a + b if a, b >= 0 */
-	if (a.sign == '+' && b.sign == '+')
+	if ((a.sign == '+' || is_zero(a)) && (b.sign == '+' || is_zero(b)))
 		return positive_sum(a, b);
 
 	/* -(|a| + |b|) if a, b <= 0 */
-	if (a.sign == '-' && b.sign == '-') {
+	if ((a.sign == '-' || is_zero(a)) && (b.sign == '-' || is_zero(b))) {
 		res = positive_sum(abs_ubint(a), abs_ubint(b));
 		res.sign = '-';
 		return res;
 	}
 
 	/* a - |b| if a >= 0, b < 0 */
-	if (a.sign == '+' && b.sign == '-' && !is_zero(b)) {
+	if ((a.sign == '+' || is_zero(a)) && b.sign == '-' && !is_zero(b)) {
 		tmp = abs_ubint(b);
 		if (compare(a, tmp) >= 0) { /* a >= |b| */
 			return positive_difference(a, tmp);
@@ -605,7 +605,7 @@ ubint sum_ubint(ubint a, ubint b){
 	}
 
 	/* b - |a| if b >= 0, a < 0 */
-	if (b.sign == '+' && a.sign == '-' && !is_zero(a)) {
+	if ((b.sign == '+' || is_zero(b)) && a.sign == '-' && !is_zero(a)) {
 		tmp = abs_ubint(a);
 		if (compare(b, tmp) >= 0) { /* b >= |a| */
 			return positive_difference(b, tmp);
@@ -618,5 +618,53 @@ ubint sum_ubint(ubint a, ubint b){
 	
  error:
 	fprintf(stderr, "Could not compute sum\n");
+	return UB_ERR;
+}
+
+/*
+ * Returns the difference of the unbounded integers a and b.
+ * If an error occured, an unbounded integer of sign '*' is returned.
+ */
+ubint dif_ubint(ubint a, ubint b){
+	ubint res;
+
+	if (a.sign == '*' || b.sign == '*')
+		goto error;
+
+	/* a - b if  a, b >= 0 */
+	if ((a.sign == '+' || is_zero(a)) && (b.sign == '+' || is_zero(b))) {
+		if (compare(a, b) >= 0) { /* a >= b */
+			return positive_difference(a, b);
+		} else {
+			res = positive_difference(b, a);
+			res.sign = '-';
+			return res;
+		}
+	}
+
+	/* |b| - |a| if a, b <= 0 */
+	if ((a.sign == '-' || is_zero(a)) && (b.sign == '-' || is_zero(b))) {
+		if (compare(a, b) >= 0) { /* a >= b */
+			return positive_difference(abs_ubint(b), abs_ubint(a));
+		} else {
+			res = positive_sum(abs_ubint(a), abs_ubint(b));
+			res.sign = '-';
+			return res;
+		}
+	}
+
+	/* a + |b| if a >= 0, b < 0 */
+	if ((a.sign == '+' || is_zero(a)) && !is_zero(b) && b.sign == '-')
+		return positive_sum(a, abs_ubint(b));
+
+	/* -(b + |a|) if b >= 0, a < 0 */
+	if ((b.sign == '+' || is_zero(b)) && !is_zero(a) && a.sign == '-') {
+		res = positive_sum(b, abs_ubint(a));
+		res.sign = '-';
+		return res;
+	}
+
+ error:
+	fprintf(stderr, "Could not compute difference\n");
 	return UB_ERR;
 }

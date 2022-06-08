@@ -8,7 +8,7 @@ int main(){
 	ubint uba = str_to_ubint(sa);
 	ubint ubb = str_to_ubint(sb);
 
-	ubint sum = sum_ubint(ubb, uba);
+	ubint sum = dif_ubint(uba, ubb);
 
 	char* res = ubint_to_str(sum);
 
