@@ -715,8 +715,9 @@ ubint mult_ubint(ubint a, ubint b){
 	if (a.sign == '*' || b.sign == '*')
 		goto error;
 
-	len_res = a.len + b.len;
-	res.len = len_res;
+	len_res  = a.len + b.len;
+	res.len  = len_res;
+	res.sign = '+';
 
 	for (i = 0; i < len_res; i++) {
 		tmp = malloc(sizeof (struct digit));
