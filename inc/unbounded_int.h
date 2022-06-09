@@ -72,4 +72,10 @@ extern ubint sum_ubint(ubint a, ubint b);
  */
 extern ubint dif_ubint(ubint a, ubint b);
 
+/*
+ * Returns the product of the two unbounded integers a and b.
+ * If an error occured, returns an unbounded integer with sign '*'.
+ */
+ubint mult_ubint(ubint a, ubint b);
+
 #endif /* UNBOUNDED_INT_H */
