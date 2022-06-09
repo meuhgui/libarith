@@ -2,13 +2,13 @@
 #include "unbounded_int.h"
 
 int main(){
-	char* sa = "29";
-	char* sb = "-38";
+	char* sa = "-23";
+	char* sb = "3";
 
 	ubint uba = str_to_ubint(sa);
 	ubint ubb = str_to_ubint(sb);
 
-	ubint sum = dif_ubint(uba, ubb);
+	ubint sum = mult_ubint(uba, ubb);
 
 	char* res = ubint_to_str(sum);
 

@@ -668,3 +668,116 @@ ubint dif_ubint(ubint a, ubint b){
 	fprintf(stderr, "Could not compute difference\n");
 	return UB_ERR;
 }
+
+/*
+ * Returns a pointer to the ith digit of the unbounded integer a.
+ * The last digit is at 0.
+ * Returns NULL on error.
+ */
+static digit* get_digit_at(size_t i, ubint a){
+	size_t j; 
+	digit* res;
+
+	if (a.sign == '*' || a.len <= i || i < 0)
+		goto error;
+
+	j   = 0;
+	res = a.last;
+
+	while (j != i && res != NULL) {
+		res = res->prev;
+		j++;
+	}
+
+	return res;
+
+ error:
+	fprintf(stderr, "Could not get digit\n");
+	return NULL;
+}
+
+/*
+ * Returns the product of the two unbounded integers a and b.
+ * If an error occured, returns an unbounded integer with sign '*'.
+ */
+ubint mult_ubint(ubint a, ubint b){
+	int    i;
+	int    j;
+	int    r;
+	int    v;
+	size_t len_res;
+	digit* tmp;
+	digit* prev;
+	digit* a_tmp;
+	digit* b_tmp;
+	ubint  res;
+
+	if (a.sign == '*' || b.sign == '*')
+		goto error;
+
+	len_res = a.len + b.len;
+	res.len = len_res;
+
+	for (i = 0; i < len_res; i++) {
+		tmp = malloc(sizeof (struct digit));
+		if (tmp == NULL) {
+			perror("malloc");
+			goto error;
+		}
+
+		if (i == 0) {
+			res.first       = tmp;
+			res.first->prev = NULL;
+			res.first->val  = '0';
+			prev            = res.first;
+		} else {
+			tmp->prev  = prev;
+			prev->next = tmp;
+			tmp->val   = '0';
+			prev       = tmp;
+		}
+	}
+
+	res.last       = tmp;
+	res.last->next = NULL;
+
+	for (i = 0; i < b.len; i++) {
+		r = 0;
+		b_tmp = get_digit_at(i, b);
+		if (b_tmp == NULL)
+			goto error;
+
+		if (b_tmp->val == '0')
+			continue;
+
+		for (j = 0; j < a.len; j++) {
+			tmp   = get_digit_at(i + j, res);
+			a_tmp = get_digit_at(j, a);
+			b_tmp = get_digit_at(i, b);
+			if (tmp == NULL || a_tmp == NULL || b_tmp == NULL)
+				goto error;
+
+			v        =
+				(tmp->val - '0')
+				+ (a_tmp->val - '0') * (b_tmp->val - '0')
+				+ r;
+			tmp->val = (char) ((v % 10) + '0');
+			r        = v / 10;
+		}
+
+		tmp      = get_digit_at(i + a.len, res);
+		tmp->val = (char)(r + '0');
+	}
+
+	if ((a.sign == '-' && b.sign == '+') || (a.sign == '+' && b.sign == '-'))
+		res.sign = '-';
+	else
+		res.sign = '+';
+
+	return *remove_heading_zeros_ubint(&res);
+
+ error:
+	fprintf(stderr, "Could not compute product\n");
+	free_ubint(res);
+	return UB_ERR;
+}
